@@ -4,13 +4,13 @@ TEXTS = {
     # ── Welcome & Onboarding ──────────────────────────────────
     "welcome": {
         "uz": (
-            "👋 <b>SubHub.store</b> ga xush kelibsiz!\n\n"
+            "👋 <b>SubHub</b>ga xush kelibsiz!\n\n"
             "Bu yerda siz turli platformalar uchun bir martalik akkountlarni "
             "tez va qulay tarzda sotib olishingiz mumkin.\n\n"
             "Quyidagi menyu orqali davom eting 👇"
         ),
         "ru": (
-            "👋 Добро пожаловать в <b>SubHub.store</b>!\n\n"
+            "👋 Добро пожаловать в <b>SubHub</b>!\n\n"
             "Здесь вы можете быстро и удобно приобрести "
             "одноразовые аккаунты для различных платформ.\n\n"
             "Продолжайте через меню ниже 👇"
