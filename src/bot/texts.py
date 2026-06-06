@@ -5,7 +5,7 @@ TEXTS = {
     "welcome": {
         "uz": (
             "👋 <b>SubHub</b>ga xush kelibsiz!\n\n"
-            "Bu yerda siz turli platformalar uchun bir martalik akkountlarni "
+            "Bu yerda siz turli platformalar uchun bir martalik akkauntlarni "
             "tez va qulay tarzda sotib olishingiz mumkin.\n\n"
             "Quyidagi menyu orqali davom eting 👇"
         ),
@@ -117,7 +117,7 @@ TEXTS = {
         "ru": "\n\n❓ <b>FAQ:</b>\n{faq}",
     },
     "out_of_stock": {
-        "uz": "❌ Afsuski, bu tarif bo'yicha hozircha akkountlar tugagan.",
+        "uz": "❌ Afsuski, bu tarif bo'yicha hozircha akkauntlar tugagan.",
         "ru": "❌ К сожалению, аккаунты по этому тарифу закончились.",
     },
     "btn_buy": {
@@ -201,11 +201,11 @@ TEXTS = {
         "ru": "💰 С баланса: <b>{balance_used} UZS</b>\n💳 Картой: <b>{card_due} UZS</b>\n\n",
     },
     "screenshot_prompt": {
-        "uz": "📸 To'lovdan so'ng <b>skrinshot yuboring</b> (rasm sifatida).\n\n⚠️ <b>Diqqat:</b> Akkount siz uchun 15 daqiqaga band qilindi. Agar 15 daqiqa ichida to'lov qilib skrinshotni yubormasangiz, band qilish bekor qilinadi va akkount boshqa foydalanuvchiga sotilishi mumkin.",
+        "uz": "📸 To'lovdan so'ng <b>skrinshot yuboring</b> (rasm sifatida).\n\n⚠️ <b>Diqqat:</b> akkaunt siz uchun 15 daqiqaga band qilindi. Agar 15 daqiqa ichida to'lov qilib skrinshotni yubormasangiz, band qilish bekor qilinadi va akkaunt boshqa foydalanuvchiga sotilishi mumkin.",
         "ru": "📸 После оплаты <b>отправьте скриншот</b> (в виде фото).\n\n⚠️ <b>Внимание:</b> Аккаунт забронирован для вас на 15 минут. Если вы не произведете оплату и не отправите скриншот в течение 15 минут, бронирование будет аннулировано, и аккаунт сможет купить другой человек.",
     },
     "reservation_expired": {
-        "uz": "⚠️ <b>Buyurtma #{order_id} bekor qilindi</b>\n\n15 daqiqa ichida to'lov skrinshoti yuklanmagani sababli akkount band qilish muddati tugadi va buyurtmangiz bekor qilindi. Akkount zaxiraga qaytarildi.",
+        "uz": "⚠️ <b>Buyurtma #{order_id} bekor qilindi</b>\n\n15 daqiqa ichida to'lov skrinshoti yuklanmagani sababli akkaunt band qilish muddati tugadi va buyurtmangiz bekor qilindi. akkaunt zaxiraga qaytarildi.",
         "ru": "⚠️ <b>Заказ #{order_id} отменен</b>\n\nВремя бронирования истекло, так как скриншот оплаты не был отправлен в течение 15 минут. Ваш заказ отменен, а аккаунт возвращен в продажу.",
     },
 
@@ -216,7 +216,7 @@ TEXTS = {
             "🆔 Buyurtma: <b>#{order_id}</b>\n"
             "📦 {platform} — {plan}\n"
             "💰 To'langan: <b>{price} UZS</b> (balansdan)\n\n"
-            "🔐 <b>Akkount ma'lumotlari:</b>\n"
+            "🔐 <b>akkaunt ma'lumotlari:</b>\n"
             "👤 Login: <code>{login}</code>\n"
             "🔑 Parol: <code>{password}</code>\n\n"
             "⚠️ Ma'lumotlarni xavfsiz joyda saqlang!\n"
@@ -655,9 +655,9 @@ TEXTS = {
     "faq_text": {
         "uz": (
             "❓ <b>Ko'p so'raladigan savollar</b>\n\n"
-            "<b>1. Akkountlar nima?</b>\n"
-            "Biz turli platformalar uchun bir martalik akkountlarni sotamiz. "
-            "Har bir akkount faqat bitta foydalanuvchi uchun.\n\n"
+            "<b>1. akkauntlar nima?</b>\n"
+            "Biz turli platformalar uchun bir martalik akkauntlarni sotamiz. "
+            "Har bir akkaunt faqat bitta foydalanuvchi uchun.\n\n"
             "<b>2. Qanday to'lash mumkin?</b>\n"
             "💳 Karta orqali yoki 💰 balans orqali. Balansni referral dasturi orqali to'ldirish mumkin.\n\n"
             "<b>3. Kafolat bormi?</b>\n"
@@ -725,7 +725,7 @@ TEXTS = {
         "ru": "❌ Не найдено.",
     },
     "error_no_stock": {
-        "uz": "❌ Afsuski, akkountlar tugagan. Keyinroq urinib ko'ring.",
+        "uz": "❌ Afsuski, akkauntlar tugagan. Keyinroq urinib ko'ring.",
         "ru": "❌ К сожалению, аккаунты закончились. Попробуйте позже.",
     },
     "error_insufficient_balance": {
@@ -762,7 +762,7 @@ TEXTS = {
             "✅ <b>Buyurtmangiz tasdiqlandi!</b>\n\n"
             "🆔 Buyurtma: <b>#{order_id}</b>\n"
             "📦 {platform} — {plan}\n\n"
-            "🔐 <b>Akkount ma'lumotlari:</b>\n"
+            "🔐 <b>akkaunt ma'lumotlari:</b>\n"
             "👤 Login: <code>{login}</code>\n"
             "🔑 Parol: <code>{password}</code>\n\n"
             "⚠️ Ma'lumotlarni xavfsiz joyda saqlang!\n"
