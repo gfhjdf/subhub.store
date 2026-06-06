@@ -84,14 +84,14 @@ def plans_list(plans: list[dict], platform_id: int, lang: str) -> InlineKeyboard
     """Dynamic plan list buttons for a specific platform."""
     builder = InlineKeyboardBuilder()
     for p in plans:
-        stock = p.get("stock", 0)
-        stock_label = f" ({stock})" if stock > 0 else " (❌)"
         if p.get("plan_type") == "contact_admin":
             builder.button(
-                text=f"{p['name']}{stock_label}",
+                text=p["name"],
                 callback_data=f"plan:{p['id']}",
             )
         else:
+            stock = p.get("stock", 0)
+            stock_label = f" ({stock})" if stock > 0 else " (❌)"
             price_label = format_price(p["price_uzs"])
             builder.button(
                 text=f"{p['name']} — {price_label} UZS{stock_label}",

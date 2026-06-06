@@ -4,13 +4,13 @@ TEXTS = {
     # ── Welcome & Onboarding ──────────────────────────────────
     "welcome": {
         "uz": (
-            "👋 <b>SubHub.store</b> ga xush kelibsiz!\n\n"
+            "👋 <b>SubHub</b>ga xush kelibsiz!\n\n"
             "Bu yerda siz turli platformalar uchun bir martalik akkountlarni "
             "tez va qulay tarzda sotib olishingiz mumkin.\n\n"
             "Quyidagi menyu orqali davom eting 👇"
         ),
         "ru": (
-            "👋 Добро пожаловать в <b>SubHub.store</b>!\n\n"
+            "👋 Добро пожаловать в <b>SubHub</b>!\n\n"
             "Здесь вы можете быстро и удобно приобрести "
             "одноразовые аккаунты для различных платформ.\n\n"
             "Продолжайте через меню ниже 👇"
@@ -99,14 +99,12 @@ TEXTS = {
     "plan_detail_contact_admin": {
         "uz": (
             "📦 <b>{platform} — {plan}</b>\n\n"
-            "💬 Ushbu mahsulotni sotib olish uchun iltimos <b>admin bilan bog'laning</b>.\n"
-            "📦 Zaxirada: <b>{stock} ta</b>\n\n"
+            "💬 Ushbu mahsulotni sotib olish uchun iltimos <b>admin bilan bog'laning</b>.\n\n"
             "{description}"
         ),
         "ru": (
             "📦 <b>{platform} — {plan}</b>\n\n"
-            "💬 Для покупки этого товара, пожалуйста, <b>свяжитесь с администратором</b>.\n"
-            "📦 В наличии: <b>{stock} шт.</b>\n\n"
+            "💬 Для покупки этого товара, пожалуйста, <b>свяжитесь с администратором</b>.\n\n"
             "{description}"
         ),
     },
