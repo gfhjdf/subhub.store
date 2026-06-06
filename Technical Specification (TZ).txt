@@ -1,0 +1,970 @@
+# Technical Specification (TZ)
+**Project:** Telegram marketplace bot for selling one-time accounts + private web admin panel  
+**Version:** MVP v1.1  
+**Status:** Updated after clarification  
+**Purpose:** Developer-ready specification for implementation
+
+## 1. Project Overview
+Build a Telegram bot that acts as a lightweight online marketplace for selling **one-time accounts** for different **platforms/plans**. Users browse products in Telegram, see price and product information, choose a payment method, and receive credentials after successful payment handling.
+
+The system must include:
+- a **Telegram bot** for customers,
+- a **private web admin panel** for one admin,
+- a **shared backend + database**,
+- a **referral system** with internal balance,
+- **manual screenshot review** for card/hybrid payments,
+- **automatic delivery** for fully balance-covered orders.
+
+The UI should remain minimal:
+- Telegram side: inline keyboards only
+- Admin side: simple private website, management-focused
+
+---
+
+## 2. Main Business Goals
+1. Automate customer communication in Telegram without AI.
+2. Show products, prices, stock count, FAQs, and extra info dynamically from database.
+3. Accept payment screenshots for manual approval.
+4. Deliver one account per order after successful approval/payment.
+5. Give the admin a simple panel for inventory, pricing, texts, FAQs, orders, and reports.
+6. Support Uzbek and Russian.
+7. Support referral rewards and internal balance usage.
+
+---
+
+## 3. Roles
+
+### 3.1 Customer
+A Telegram user who can:
+- start the bot,
+- choose language,
+- browse platforms/plans,
+- view price, stock, FAQ, and extra info,
+- place an order,
+- choose payment method,
+- submit a payment screenshot when needed,
+- receive credentials,
+- view balance and referral link,
+- view order history,
+- contact support/admin.
+
+### 3.2 Admin
+A single private admin who can:
+- log into the admin panel,
+- manage catalog and texts,
+- manage credentials inventory,
+- review screenshot-based payments,
+- approve or reject orders,
+- view reports/statistics,
+- manage system messages,
+- receive alerts about important events.
+
+---
+
+## 4. Product Model
+
+### 4.1 Selling Model
+- The system sells **accounts**.
+- Each account can be sold **only once**.
+- One order delivers **exactly one account**.
+- Products are shown as a **full list** to users.
+
+### 4.2 Structure
+- A **platform** can have multiple **plans**.
+- Example:
+  - Platform: `Netflix`
+  - Plans: `1 month`, `3 months`, `Premium`, etc.
+
+### 4.3 Product Information Shown to User
+For each plan/product, the bot shows:
+- platform name,
+- plan name,
+- price,
+- available stock count,
+- description/info text,
+- FAQ for that plan,
+- out-of-stock state.
+
+### 4.4 Product Media
+- Text-only is enough for MVP.
+- No product images required.
+
+---
+
+## 5. Languages
+Customer-facing bot must support:
+- Uzbek
+- Russian
+
+### Requirements
+- User chooses language on first start.
+- All user-facing texts must support both languages.
+- Admin-managed texts must be editable per language where relevant.
+
+**Assumption:** Admin panel UI itself may be single-language for MVP.
+
+---
+
+## 6. Payment Methods
+
+## 6.1 Supported Methods
+The bot must support 3 payment methods:
+1. `Full card`
+2. `From balance`
+3. `Hybrid`
+
+## 6.2 Full Card
+- User pays full order amount by card.
+- Bot shows fixed payment instructions.
+- User sends screenshot.
+- Order goes to admin review.
+- Admin approves/rejects in web panel.
+
+## 6.3 From Balance
+- If user balance is enough to fully cover the product price:
+  - order is auto-accepted,
+  - no application is sent to admin for approval,
+  - account is auto-delivered,
+  - action must be logged.
+- If balance is not enough:
+  - method is unavailable,
+  - bot asks user to choose another payment method.
+
+## 6.4 Hybrid
+- User balance is used as discount.
+- Remaining amount is paid by card.
+- Example:
+  - Product: `70,000 UZS`
+  - Balance: `10,000 UZS`
+  - Card payment due: `60,000 UZS`
+- Bot shows fixed payment instructions.
+- User sends screenshot.
+- Order goes to admin review.
+- On rejection, reserved balance must be restored.
+
+## 6.5 Payment Instructions
+- Payment instructions are **fixed for everyone**.
+- They should be editable from admin panel.
+- They should support manual editing of all user-facing text variants.
+
+---
+
+## 7. Referral System and Balance
+
+## 7.1 Referral Link
+Each user has a unique referral link:
+- `https://t.me/<bot_username>?start=ref_<code>`
+
+## 7.2 Reward Logic
+When a **new user** opens the bot via referral link and presses `/start`:
+- inviter gets `+3,000 UZS`,
+- reward is granted once for that invited user only,
+- invited user must be a new bot user.
+
+## 7.3 Referral Balance
+Each user has internal balance in UZS.
+Balance can only be used to pay for products inside the bot.
+
+### Important rule
+- Balance **cannot be withdrawn**.
+- Balance is **spend-only** inside the bot.
+
+## 7.4 Referral Abuse Protection
+The system must block obvious abuse:
+- no self-referrals,
+- no duplicate reward for same invited user,
+- repeated `/start` must not reward again,
+- existing users cannot trigger referral reward later.
+
+The system should also support basic suspicious referral detection.
+
+If suspicious referral behavior is detected:
+- bot/admin system should inform admin,
+- the user who created that referral link should also be informed.
+
+**Needs clarification:** exact suspicious behavior rules for MVP.  
+**Recommended MVP scope:** basic alerts for repeated suspicious patterns, while still enforcing hard uniqueness rules.
+
+## 7.5 Balance Usage Rules
+- Balance can cover full price or partial price.
+- In hybrid mode, available balance is used up to order total.
+- Balance-only payments are auto-delivered and logged.
+- Hybrid balance must be reserved until admin decision.
+- On hybrid rejection/cancel, reserved balance must be restored.
+
+---
+
+## 8. Warranty and Support
+
+## 8.1 Warranty Rule
+- Warranty period: **7 days** after delivery.
+- If user contacts regarding an order after 7 days, bot sends refusal text.
+
+## 8.2 Support Handling
+- Within 7 days: bot tells user to contact admin.
+- After 7 days: bot shows refusal text.
+- General support/contact option should still remain available.
+
+## 8.3 Editable Messages
+All such messages must be editable in admin panel, including:
+- payment instructions,
+- rejection messages,
+- warranty-expired message,
+- support texts,
+- referral messages,
+- other system texts shown to users.
+
+---
+
+## 9. User Flows
+
+## 9.1 First Start Flow
+1. User opens bot.
+2. Bot registers Telegram user by `telegram_id`.
+3. Bot asks for language if not chosen.
+4. If referral parameter exists:
+   - validate referral,
+   - prevent abuse/duplicates/self-referral,
+   - create referral relation,
+   - add `3,000 UZS` to inviter if valid.
+5. Show main menu.
+
+### Suggested Main Menu
+- Products
+- My Orders
+- My Balance
+- Referral Link
+- FAQ
+- Support
+- Language
+
+---
+
+## 9.2 Browse Products Flow
+1. User opens `Products`.
+2. Bot shows full list of platforms/plans.
+3. User selects a plan.
+4. Bot shows:
+   - platform,
+   - plan,
+   - price,
+   - available quantity,
+   - description/info,
+   - FAQ,
+   - buy button.
+5. If stock is zero:
+   - show `Out of stock`,
+   - disable buying.
+
+---
+
+## 9.3 Purchase Flow
+1. User selects product.
+2. Bot shows summary.
+3. User chooses payment method:
+   - Full card
+   - From balance
+   - Hybrid
+4. Bot calculates order amounts.
+5. Bot continues by selected method.
+
+---
+
+## 9.4 Full Card Flow
+1. Create unpaid order.
+2. Show fixed payment instructions.
+3. User sends screenshot.
+4. Bot saves screenshot and marks order as submitted.
+5. Admin gets notification.
+6. Admin reviews in web panel.
+7. Admin approves or rejects.
+8. If approved:
+   - system assigns one available account,
+   - sends `login + password`,
+   - marks order delivered,
+   - logs action.
+9. If rejected:
+   - bot sends editable rejection message.
+
+---
+
+## 9.5 Balance-Only Flow
+1. Validate sufficient balance.
+2. Create order.
+3. Deduct balance.
+4. Auto-assign one available account.
+5. Send `login + password`.
+6. Mark order delivered.
+7. Log the action.
+8. Admin does not receive approval application.
+
+---
+
+## 9.6 Hybrid Flow
+1. Validate user has positive balance.
+2. Reserve available balance up to order total.
+3. Calculate remaining amount due by card.
+4. Create order with:
+   - original amount,
+   - reserved balance,
+   - card due amount.
+5. Show fixed payment instructions.
+6. User sends screenshot.
+7. Admin reviews in web panel.
+8. On approval:
+   - reserved balance becomes final spend,
+   - account is assigned,
+   - credentials are sent.
+9. On rejection:
+   - reserved balance is restored,
+   - bot sends rejection message.
+
+---
+
+## 9.7 User Order History
+User can open `My Orders` and receive **all orders in one message**.
+
+Each order entry must include:
+- order ID,
+- platform,
+- plan,
+- price,
+- date,
+- delivered login,
+- delivered password.
+
+### Important clarification applied
+- Notes should **not** appear in order history.
+
+---
+
+## 9.8 Support Flow
+1. User opens `Support`.
+2. Bot offers general contact/admin access.
+3. If user seeks help for a purchased order:
+   - if within 7 days: tell user to contact admin,
+   - if after 7 days: show refusal text.
+4. General contact remains available even after 7 days.
+
+---
+
+## 9.9 Order Cancellation Flow
+Users must be able to cancel unpaid orders themselves.
+
+### Rules
+- Only unpaid/unapproved orders can be cancelled by user.
+- If order used reserved hybrid balance, reserved balance must be restored.
+- If screenshot already submitted and order is under review, cancellation behavior should be defined.
+
+**Assumption for MVP:** user can cancel only before screenshot submission.  
+**Needs clarification:** whether cancellation is allowed after screenshot submission but before admin decision.
+
+---
+
+## 10. Admin Flows
+
+## 10.1 Login
+1. Admin opens private web panel.
+2. Logs in with username/password.
+3. Secure session is created.
+
+## 10.2 Review Screenshot-Based Order
+1. Admin opens `Orders`.
+2. Sees pending list.
+3. Opens order details:
+   - order ID,
+   - user info,
+   - platform/plan,
+   - original amount,
+   - balance used,
+   - remaining card amount,
+   - screenshot,
+   - timestamps.
+4. Admin clicks `Approve` or `Reject`.
+
+### Approve
+- validate stock,
+- atomically assign one available account,
+- update statuses,
+- send credentials to user,
+- write audit log.
+
+### Reject
+- mark rejected,
+- send editable rejection text,
+- restore hybrid reserved balance if needed,
+- write audit log.
+
+## 10.3 Catalog Management
+Admin can:
+- create/edit/delete platforms,
+- create/edit/delete plans,
+- set prices,
+- set active/inactive,
+- edit multilingual descriptions,
+- edit multilingual FAQ per plan,
+- edit visible texts.
+
+## 10.4 Inventory Management
+Admin can:
+- add credentials manually,
+- bulk import credentials,
+- edit optional internal notes,
+- view stock counts,
+- filter by platform/plan/status.
+
+## 10.5 Settings Management
+Admin can edit:
+- payment instructions,
+- rejection message,
+- warranty-expired message,
+- support text,
+- referral texts,
+- other user-facing system texts,
+- referral reward amount if desired.
+
+## 10.6 Reports and Analytics
+Admin sees:
+- total orders,
+- paid/delivered orders,
+- rejected orders,
+- revenue,
+- low stock,
+- referral metrics,
+- main charts.
+
+---
+
+## 11. Functional Requirements
+
+## 11.1 Telegram Bot
+The bot must:
+1. register users by Telegram ID,
+2. store username if available,
+3. support Uzbek and Russian,
+4. show catalog dynamically from DB,
+5. show available quantity,
+6. show out-of-stock items,
+7. support one order = one account,
+8. support full card / balance / hybrid,
+9. accept screenshot uploads,
+10. create and track orders,
+11. send admin notifications for screenshot-based orders,
+12. auto-deliver balance-only orders,
+13. show balance and referral link,
+14. credit inviter on valid referral start,
+15. show order history in one message,
+16. provide support flow,
+17. enforce 7-day warranty logic,
+18. allow user to cancel unpaid order,
+19. log important actions.
+
+## 11.2 Admin Panel
+The panel must:
+1. require login,
+2. show dashboard metrics,
+3. list and filter orders,
+4. preview screenshots,
+5. approve/reject orders,
+6. manage platforms/plans,
+7. manage prices and texts,
+8. manage FAQ per plan,
+9. manage credentials stock,
+10. support bulk account upload,
+11. show user/referral/balance data,
+12. show reports/charts,
+13. allow manual editing of all system texts,
+14. show audit logs.
+
+---
+
+## 12. Non-Functional Requirements
+1. System runs 24/7 on a server.
+2. Bot and admin panel share one backend/database.
+3. Admin panel should be responsive enough for desktop and mobile.
+4. Catalog and text changes should appear without redeploy.
+5. Duplicate account delivery must be prevented.
+6. Core operations must be transaction-safe.
+7. Logs must exist for all sensitive actions.
+8. UI can be minimal but must be clear and usable.
+
+---
+
+## 13. Recommended Architecture
+Components:
+- Telegram Bot service
+- Admin Web Panel
+- Backend API / business logic
+- Relational database
+- File storage for screenshots
+- Optional background jobs for notifications/retries
+
+### Integration Model
+Bot and web panel are separate interfaces connected to the same backend and database.
+
+---
+
+## 14. Database Structure
+
+## 14.1 `users`
+- `id`
+- `telegram_id` unique
+- `telegram_username` nullable
+- `first_name` nullable
+- `last_name` nullable
+- `language_code`
+- `balance_uzs`
+- `referred_by_user_id` nullable
+- `referral_code` unique
+- `created_at`
+- `updated_at`
+
+## 14.2 `platforms`
+- `id`
+- `name`
+- `slug`
+- `is_active`
+- `sort_order`
+- `created_at`
+- `updated_at`
+
+## 14.3 `plans`
+- `id`
+- `platform_id`
+- `name`
+- `price_uzs`
+- `description_uz`
+- `description_ru`
+- `faq_uz`
+- `faq_ru`
+- `is_active`
+- `sort_order`
+- `created_at`
+- `updated_at`
+
+## 14.4 `accounts`
+- `id`
+- `plan_id`
+- `login`
+- `password`
+- `notes` nullable
+- `status` (`available`, `reserved`, `sold`, `disabled`)
+- `reserved_for_order_id` nullable
+- `sold_order_id` nullable
+- `sold_to_user_id` nullable
+- `sold_at` nullable
+- `created_at`
+- `updated_at`
+
+## 14.5 `orders`
+- `id`
+- `public_order_id`
+- `user_id`
+- `platform_id`
+- `plan_id`
+- `account_id` nullable
+- `payment_method` (`full_card`, `balance`, `hybrid`)
+- `price_original_uzs`
+- `balance_used_uzs`
+- `card_due_uzs`
+- `status`
+- `payment_screenshot_file_id` nullable
+- `payment_screenshot_path` nullable
+- `rejection_reason_code` nullable
+- `rejection_note` nullable
+- `approved_by_admin_id` nullable
+- `approved_at` nullable
+- `rejected_at` nullable
+- `delivered_at` nullable
+- `cancelled_at` nullable
+- `created_at`
+- `updated_at`
+
+### Suggested statuses
+- `created`
+- `pending_payment`
+- `payment_submitted`
+- `under_review`
+- `approved`
+- `rejected`
+- `delivered`
+- `cancelled`
+- `failed`
+
+## 14.6 `balance_transactions`
+- `id`
+- `user_id`
+- `type` (`referral_reward`, `order_reserve`, `order_release`, `order_spend`, `manual_adjustment`)
+- `amount_uzs`
+- `order_id` nullable
+- `related_user_id` nullable
+- `comment` nullable
+- `created_at`
+
+## 14.7 `referrals`
+- `id`
+- `inviter_user_id`
+- `invited_user_id` unique
+- `reward_uzs`
+- `status`
+- `created_at`
+
+## 14.8 `admin_users`
+- `id`
+- `username`
+- `password_hash`
+- `is_active`
+- `created_at`
+- `updated_at`
+
+## 14.9 `audit_logs`
+- `id`
+- `admin_user_id` nullable
+- `actor_type` (`admin`, `system`, `user`)
+- `action`
+- `entity_type`
+- `entity_id`
+- `meta_json`
+- `created_at`
+
+## 14.10 `settings`
+- `key`
+- `value_json` or `value_text`
+- `updated_at`
+
+Examples:
+- payment instructions
+- rejection message
+- warranty-expired message
+- support message
+- referral reward amount
+- suspicious referral alert text
+- low stock threshold
+
+## 14.11 `system_alerts` (recommended)
+To track suspicious or important events.
+
+- `id`
+- `type`
+- `severity`
+- `user_id` nullable
+- `related_user_id` nullable
+- `payload_json`
+- `status`
+- `created_at`
+
+---
+
+## 15. API Endpoints
+
+## 15.1 Bot-Facing API
+### Users
+- `POST /api/bot/users/register-or-update`
+- `GET /api/bot/users/:telegramId`
+- `POST /api/bot/users/:telegramId/language`
+
+### Referrals
+- `POST /api/bot/referrals/apply-start`
+- `GET /api/bot/users/:telegramId/referral`
+- `GET /api/bot/users/:telegramId/balance`
+
+### Catalog
+- `GET /api/bot/platforms`
+- `GET /api/bot/platforms/:id/plans`
+- `GET /api/bot/plans/:id`
+
+### Orders
+- `POST /api/bot/orders`
+- `GET /api/bot/users/:telegramId/orders`
+- `GET /api/bot/orders/:id`
+- `POST /api/bot/orders/:id/payment-screenshot`
+- `POST /api/bot/orders/:id/cancel`
+
+### Support
+- `POST /api/bot/support/check-warranty`
+- `GET /api/bot/support/contact`
+
+---
+
+## 15.2 Admin API
+### Auth
+- `POST /api/admin/auth/login`
+- `POST /api/admin/auth/logout`
+- `GET /api/admin/auth/me`
+
+### Dashboard / Reports
+- `GET /api/admin/dashboard/summary`
+- `GET /api/admin/reports/orders`
+- `GET /api/admin/reports/revenue`
+- `GET /api/admin/reports/referrals`
+
+### Orders
+- `GET /api/admin/orders`
+- `GET /api/admin/orders/:id`
+- `POST /api/admin/orders/:id/approve`
+- `POST /api/admin/orders/:id/reject`
+
+### Platforms
+- `GET /api/admin/platforms`
+- `POST /api/admin/platforms`
+- `PUT /api/admin/platforms/:id`
+- `DELETE /api/admin/platforms/:id`
+
+### Plans
+- `GET /api/admin/plans`
+- `POST /api/admin/plans`
+- `PUT /api/admin/plans/:id`
+- `DELETE /api/admin/plans/:id`
+
+### Accounts
+- `GET /api/admin/accounts`
+- `POST /api/admin/accounts`
+- `POST /api/admin/accounts/bulk`
+- `PUT /api/admin/accounts/:id`
+- `GET /api/admin/accounts/stock-summary`
+
+### Users / Referrals / Balance
+- `GET /api/admin/users`
+- `GET /api/admin/users/:id`
+- `GET /api/admin/users/:id/orders`
+- `GET /api/admin/users/:id/balance-transactions`
+- `GET /api/admin/referrals`
+- `GET /api/admin/alerts`
+
+### Settings
+- `GET /api/admin/settings`
+- `PUT /api/admin/settings`
+
+### Audit
+- `GET /api/admin/audit-logs`
+
+---
+
+## 16. Admin Panel Requirements
+
+## 16.1 Login Page
+- username/password login
+- invalid login handling
+- secure authenticated session
+
+## 16.2 Dashboard
+Show:
+- pending screenshot orders
+- delivered orders
+- rejected orders
+- revenue
+- stock totals
+- low stock warnings
+- referral rewards issued
+- suspicious referral alerts
+
+## 16.3 Orders Page
+Features:
+- list of all orders
+- filters by status/date/platform/payment method
+- order details
+- screenshot preview
+- approve/reject buttons
+- user info
+- balance/card breakdown
+- timestamps
+
+## 16.4 Platforms / Plans Page
+Features:
+- create/edit/delete platforms
+- create/edit/delete plans
+- set price
+- set active/inactive
+- edit Uzbek/Russian descriptions
+- edit Uzbek/Russian FAQ
+
+## 16.5 Accounts Page
+Features:
+- add one credential
+- bulk import credentials
+- edit internal notes
+- filter by platform/plan/status
+- see stock counts
+
+## 16.6 Users / Referrals Page
+Features:
+- user list
+- balances
+- inviter/invited data
+- referral counts
+- suspicious referral alerts
+- user order summary
+
+## 16.7 Reports Page
+Features:
+- headline KPI cards
+- simple charts
+- time filters
+- order/revenue/referral metrics
+
+## 16.8 Settings Page
+All editable messages and text configuration should live here.
+
+---
+
+## 17. Business Rules
+1. One order = one account.
+2. One account can be sold only once.
+3. Stock count shown to users = count of available accounts only.
+4. Out-of-stock products remain visible.
+5. Balance is spend-only inside the bot.
+6. Referral reward = `3,000 UZS` per valid new invited user.
+7. Reward is granted on first valid `/start`.
+8. No multiple simultaneous unpaid orders per user.
+9. Balance-only orders are auto-delivered and logged.
+10. Hybrid uses available balance up to order total.
+11. Hybrid rejected/cancelled orders restore reserved balance.
+12. Notes may be delivered with credentials internally if desired, but must not appear in user order history.
+13. All user-facing texts must be editable from admin panel.
+14. Support after 7 days for that order returns refusal text, but general support remains available.
+
+---
+
+## 18. Edge Cases and Error Handling
+
+## 18.1 Stock
+- If user tries to buy out-of-stock plan: show out-of-stock message.
+- If admin approves when no stock exists: block approval and show error.
+- Account assignment must be atomic to prevent duplicate delivery.
+
+## 18.2 Payments
+- If user uploads invalid file instead of screenshot: reject with instruction.
+- If user submits screenshot with no active order: show error.
+- If user tries balance-only without enough balance: disallow method.
+- If user tries hybrid with zero balance: either disallow hybrid or treat it as full card.
+
+**Assumption:** hybrid should require positive balance; otherwise it is not shown.
+
+## 18.3 Referrals
+- Self-referral: ignored and optionally logged.
+- Duplicate referral: ignored and optionally logged.
+- Existing user started via referral later: no reward.
+- Suspicious referral patterns: create alert, notify admin, notify inviter.
+
+## 18.4 Order Cancellation
+- User can cancel unpaid order.
+- If reserved hybrid balance exists, restore it.
+- Cancelled order cannot later be paid/approved.
+
+## 18.5 Warranty
+- If user asks about product issue within 7 days: contact admin.
+- If after 7 days: show editable refusal message.
+
+## 18.6 Order History
+- Only the owner of the Telegram account can access their history.
+- History contains credentials, so access control must be strict.
+
+---
+
+## 19. Security Requirements
+1. Admin passwords must be hashed.
+2. Admin panel must use authenticated sessions.
+3. Admin endpoints require authorization.
+4. Screenshots must not be publicly exposed.
+5. Unsold credentials must be visible only to admin.
+6. Sensitive actions must be logged.
+7. Core financial/inventory actions must use DB transactions.
+8. Rate limit login attempts.
+9. Use HTTPS in production.
+10. Prevent duplicate approvals and duplicate deliveries.
+
+---
+
+## 20. Notifications
+
+## 20.1 Admin Notifications
+Admin should receive notifications for:
+- new screenshot submitted,
+- suspicious referral activity,
+- optionally low stock alerts,
+- optionally delivery/system failure alerts.
+
+## 20.2 User Notifications
+User should receive:
+- order created,
+- payment instructions,
+- screenshot received,
+- order approved,
+- order rejected,
+- credentials delivered,
+- balance credited from referral,
+- warranty-expired refusal when applicable.
+
+---
+
+## 21. Testing Requirements
+
+## 21.1 Unit Tests
+Cover:
+- referral reward logic,
+- self-referral prevention,
+- duplicate referral prevention,
+- suspicious referral detection rules,
+- balance calculations,
+- hybrid reservation/release,
+- order cancellation,
+- order status transitions,
+- warranty date checks.
+
+## 21.2 Integration Tests
+Cover:
+- user registration,
+- language selection,
+- referral start flow,
+- full card order flow,
+- balance-only auto-delivery flow,
+- hybrid flow,
+- screenshot submission,
+- admin approve/reject,
+- balance restore on hybrid rejection/cancel,
+- order history output.
+
+## 21.3 End-to-End Tests
+1. New user starts bot normally.
+2. Referred user starts bot and inviter receives reward.
+3. User buys via full card and gets delivery after approval.
+4. User buys via full balance and gets instant delivery.
+5. User buys via hybrid and sees correct payable amount.
+6. Rejected hybrid order restores balance.
+7. User cannot create second unpaid order while first is still open.
+8. Out-of-stock item cannot be purchased.
+9. User cancels unpaid order successfully.
+10. Warranty-expired message works after 7 days.
+
+---
+
+## 22. MVP Acceptance Criteria
+The MVP is accepted if all below are working:
+
+1. User can start bot and choose Uzbek or Russian.
+2. Bot shows platforms/plans from DB.
+3. Bot shows price, stock count, info text, and FAQ.
+4. Out-of-stock products remain visible and blocked for purchase.
+5. User can place one order for one account.
+6. User can choose full card, balance, or hybrid.
+7. If balance is enough, order is auto-delivered without admin application and is logged.
+8. Hybrid correctly reduces amount due and restores balance on rejection/cancel.
+9. User can submit payment screenshot for card/hybrid.
+10. Admin can log into web panel.
+11. Admin can review screenshot-based orders only in web panel.
+12. Admin can approve/reject orders.
+13. On approval, one unique account is delivered and marked sold.
+14. On rejection, user receives editable rejection message.
+15. Admin can manage platforms, plans, prices, FAQs, and texts.
+16. Admin can add credentials and manage stock.
+17. User can view all order history in one message.
+18. User has referral link and internal balance.
+19. Inviter receives `3,000 UZS` for valid referred new user.
+20. Suspicious referral events generate alerts to admin and inviter.
+21. User can use balance only inside bot.
+22. User can cancel unpaid orders.
+23. Support flow enforces 7-day refusal for order-related issues but keeps general contact available.
+24. Reports/dashboard show core metrics.
+25. All major actions are logged.
+
+---

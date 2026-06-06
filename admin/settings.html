@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройки системы — SubHub.store Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+        .settings-section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--accent-purple-light);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+        .form-tab {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+        }
+        .form-tab.active {
+            color: var(--accent-cyan);
+            border-bottom-color: var(--accent-cyan);
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">🏪</div>
+                <div>
+                    <div class="brand-text">SubHub.store</div>
+                    <div class="brand-sub">Панель управления</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Главная</div>
+                <a href="/admin/dashboard.html" class="nav-item">
+                    <span class="nav-icon">📊</span> Панель состояния
+                </a>
+                <a href="/admin/orders.html" class="nav-item">
+                    <span class="nav-icon">📋</span> Заказы
+                    <span class="nav-badge" id="nav-pending-badge" style="display:none;">0</span>
+                </a>
+                <a href="/admin/redemptions.html" class="nav-item">
+                    <span class="nav-icon">🎁</span> Заявки на подарки
+                    <span class="nav-badge" id="nav-redemptions-badge" style="display:none;">0</span>
+                </a>
+                <a href="/admin/wallet_topups.html" class="nav-item">
+                    <span class="nav-icon">💳</span> Пополнения кошелька
+                    <span class="nav-badge" id="nav-topups-badge" style="display:none;">0</span>
+                </a>
+                <div class="nav-section-title">Каталог</div>
+                <a href="/admin/platforms.html" class="nav-item">
+                    <span class="nav-icon">🎮</span> Платформы и Тарифы
+                </a>
+                <a href="/admin/accounts.html" class="nav-item">
+                    <span class="nav-icon">🔑</span> Аккаунты
+                </a>
+                <a href="/admin/rewards.html" class="nav-item">
+                    <span class="nav-icon">🏆</span> Каталог подарков
+                </a>
+                <div class="nav-section-title">Пользователи</div>
+                <a href="/admin/users.html" class="nav-item">
+                    <span class="nav-icon">👥</span> Пользователи
+                </a>
+                <div class="nav-section-title">Аналитика</div>
+                <a href="/admin/reports.html" class="nav-item">
+                    <span class="nav-icon">📈</span> Отчеты
+                </a>
+                <a href="/admin/settings.html" class="nav-item active">
+                    <span class="nav-icon">⚙️</span> Настройки
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item" id="logout-btn">
+                    <span class="nav-icon">🚪</span> Выйти
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="menu-toggle" id="menu-toggle">☰</button>
+                    <div>
+                        <div class="page-title">Настройки системы</div>
+                        <div class="page-subtitle">Настройка платежных реквизитов, реферальных выплат и текстов на двух языках</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content">
+                <div class="settings-grid">
+                    <form id="settings-form" style="display: contents;">
+                        
+                        <!-- Section A: Payment Details & General Config -->
+                        <div class="card">
+                            <div class="card-header" style="border-bottom:none; padding-bottom:0;">
+                                <h3 class="card-title">⚙️ Основные настройки</h3>
+                            </div>
+                            <div style="padding: 24px;">
+                                <div class="settings-section-title">💳 Платежные реквизиты (Карта)</div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-card-number">Номер карты продавца</label>
+                                        <input type="text" class="form-input" id="set-card-number" placeholder="8600 ...." required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-card-holder">Имя держателя карты</label>
+                                        <input type="text" class="form-input" id="set-card-holder" placeholder="Например, Иван Иванов" required>
+                                    </div>
+                                </div>
+
+                                <div class="settings-section-title" style="margin-top: 24px;">🎁 Балловая система и Уведомления об остатках</div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-points-referral">Баллов за приглашение (реферал)</label>
+                                        <input type="number" class="form-input" id="set-points-referral" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-points-checkin">Баллов за ежедневный вход</label>
+                                        <input type="number" class="form-input" id="set-points-checkin" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-stock-threshold">Порог предупреждения о малом количестве</label>
+                                        <input type="number" class="form-input" id="set-stock-threshold" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-ref-reward">Legacy: Сумма реферального бонуса (UZS)</label>
+                                        <input type="number" class="form-input" id="set-ref-reward" required>
+                                    </div>
+                                </div>
+
+                                <div class="settings-section-title" style="margin-top: 24px;">💬 Контакт поддержки</div>
+                                <div class="form-group" style="max-width: 500px;">
+                                    <label class="form-label" for="set-support-contact">Имя пользователя Telegram / Ссылка на поддержку</label>
+                                                                    <input type="text" class="form-input" id="set-support-contact" placeholder="Например, @subhub_support_agent" required>
+                                </div>
+
+                                <div class="settings-section-title" style="margin-top: 24px;">💳 Настройки кошелька</div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-wallet-enabled">Включить кошелек</label>
+                                        <select class="form-input" id="set-wallet-enabled" required>
+                                            <option value="true">Да, включить</option>
+                                            <option value="false">Нет, отключить</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-wallet-min">Минимальная сумма пополнения (UZS)</label>
+                                        <input type="number" class="form-input" id="set-wallet-min" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-wallet-max">Максимальная сумма пополнения (UZS)</label>
+                                        <input type="number" class="form-input" id="set-wallet-max" required>
+                                    </div>
+                                </div>
+                        </div>
+
+                        <!-- Section: Telegram Channel Subscription Check -->
+                        <div class="card">
+                            <div class="card-header" style="border-bottom:none; padding-bottom:0;">
+                                <h3 class="card-title">📢 Обязательная подписка на Telegram-канал</h3>
+                            </div>
+                            <div style="padding: 24px;">
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-sub-enabled">Проверка подписки</label>
+                                        <select class="form-input" id="set-sub-enabled" required>
+                                            <option value="true">Включена</option>
+                                            <option value="false">Выключена</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-sub-channel">Юзернейм или ссылка на канал</label>
+                                        <input type="text" class="form-input" id="set-sub-channel" placeholder="Например, @subhub_uz" required>
+                                    </div>
+                                </div>
+
+                                <div class="settings-section-title" style="margin-top: 24px;">📝 Текст с просьбой подписаться</div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-sub-msg-uz">Сообщение (на узбекском)</label>
+                                        <textarea class="form-input" id="set-sub-msg-uz" rows="3" placeholder="Инструкции подписаться на узбекском..." required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-sub-msg-ru">Сообщение (на русском)</label>
+                                        <textarea class="form-input" id="set-sub-msg-ru" rows="3" placeholder="Инструкции подписаться на русском..." required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section B: Multilingual Texts -->
+                        <div class="card">
+                            <div class="card-header" style="border-bottom:none; padding-bottom:0;">
+                                <h3 class="card-title">💬 Тексты сообщений бота</h3>
+                            </div>
+                            <div style="padding: 24px;">
+                                <!-- Tabs for Uzbek and Russian texts -->
+                                <div class="form-tabs">
+                                    <button type="button" class="form-tab active" id="tab-uz" onclick="switchSettingsTab('uz')">Узбекский (UZ) 🇺🇿</button>
+                                    <button type="button" class="form-tab" id="tab-ru" onclick="switchSettingsTab('ru')">Русский (RU) 🇷🇺</button>
+                                </div>
+
+                                <!-- Uzbek Text Fields -->
+                                <div id="fields-uz">
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-instructions-uz">Инструкция к оплате картой (на узбекском)</label>
+                                        <textarea class="form-input" id="set-instructions-uz" rows="4" placeholder="Инструкции, отправляемые пользователям, с описанием того, как оплатить картой и загрузить скриншот." required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-warranty-uz">Сообщение об истечении гарантии (на узбекском)</label>
+                                        <textarea class="form-input" id="set-warranty-uz" rows="3" placeholder="Сообщение, показываемое пользователю, если он запрашивает поддержку для заказа, созданного более 7 дней назад." required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-faq-uz">Содержимое раздела FAQ (на узбекском)</label>
+                                        <textarea class="form-input" id="set-faq-uz" rows="6" placeholder="Общая информация FAQ, отображаемая при нажатии кнопки FAQ в боте." required></textarea>
+                                    </div>
+                                </div>
+
+                                <!-- Russian Text Fields -->
+                                <div id="fields-ru" style="display:none;">
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-instructions-ru">Инструкция к оплате картой (на русском)</label>
+                                        <textarea class="form-input" id="set-instructions-ru" rows="4" placeholder="Инструкции по оплате картой..." required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-warranty-ru">Сообщение об истечении гарантии (на русском)</label>
+                                        <textarea class="form-input" id="set-warranty-ru" rows="3" placeholder="Сообщение об истечении гарантии..." required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="set-faq-ru">Содержимое раздела FAQ (на русском)</label>
+                                        <textarea class="form-input" id="set-faq-ru" rows="6" placeholder="Общий FAQ..." required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Submit -->
+                        <div style="display:flex; justify-content: flex-end; margin-top: 8px;">
+                            <button type="submit" class="btn btn-primary btn-lg" style="min-width: 200px;">Сохранить настройки системы</button>
+                        </div>
+                    </form>
+
+                    <form id="admin-security-form" style="display: contents;">
+                        <!-- Section: Admin Credentials -->
+                        <div class="card">
+                            <div class="card-header" style="border-bottom:none; padding-bottom:0;">
+                                <h3 class="card-title">🔐 Безопасность</h3>
+                            </div>
+                            <div style="padding: 24px;">
+                                <div class="settings-section-title">Смена логина и пароля администратора</div>
+                                <div class="grid-2">
+                                    <div class="form-group">
+                                        <label class="form-label" for="sec-new-username">Новый логин (необязательно)</label>
+                                        <input type="text" class="form-input" id="sec-new-username" placeholder="Новый логин">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="sec-new-password">Новый пароль (необязательно)</label>
+                                        <input type="password" class="form-input" id="sec-new-password" placeholder="Минимум 6 символов">
+                                    </div>
+                                </div>
+                                <div class="form-group" style="max-width: 500px; margin-top: 16px;">
+                                    <label class="form-label" for="sec-current-password">Текущий пароль <span style="color: var(--danger); font-weight: bold;">*</span></label>
+                                    <input type="password" class="form-input" id="sec-current-password" placeholder="Введите текущий пароль для подтверждения" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Submit Security -->
+                        <div style="display:flex; justify-content: flex-end; margin-top: 8px;">
+                            <button type="submit" class="btn btn-primary btn-lg" style="min-width: 200px;">Обновить учетные данные</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/settings.js"></script>
+    <script>
+        if (requireAuth()) {
+            initSidebar();
+            initLogout();
+            initSettings();
+        }
+    </script>
+</body>
+</html>

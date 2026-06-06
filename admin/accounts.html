@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Склад аккаунтов — SubHub.store</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stock-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stock-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .stock-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .stock-badge {
+            font-size: 16px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            background: var(--surface-active);
+        }
+        .form-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+        .form-tab {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+        }
+        .form-tab.active {
+            color: var(--accent-purple-light);
+            border-bottom-color: var(--accent-purple-light);
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">🏪</div>
+                <div>
+                    <div class="brand-text">SubHub.store</div>
+                    <div class="brand-sub">Админ-панель</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Главная</div>
+                <a href="/admin/dashboard.html" class="nav-item">
+                    <span class="nav-icon">📊</span> Панель состояния
+                </a>
+                <a href="/admin/orders.html" class="nav-item">
+                    <span class="nav-icon">📋</span> Заказы
+                    <span class="nav-badge" id="nav-pending-badge" style="display:none;">0</span>
+                </a>
+                <a href="/admin/redemptions.html" class="nav-item">
+                    <span class="nav-icon">🎁</span> Заявки на подарки
+                    <span class="nav-badge" id="nav-redemptions-badge" style="display:none;">0</span>
+                </a>
+                <a href="/admin/wallet_topups.html" class="nav-item">
+                    <span class="nav-icon">💳</span> Пополнения кошелька
+                    <span class="nav-badge" id="nav-topups-badge" style="display:none;">0</span>
+                </a>
+                <div class="nav-section-title">Каталог</div>
+                <a href="/admin/platforms.html" class="nav-item">
+                    <span class="nav-icon">🎮</span> Платформы и Тарифы
+                </a>
+                <a href="/admin/accounts.html" class="nav-item active">
+                    <span class="nav-icon">🔑</span> Аккаунты
+                </a>
+                <a href="/admin/rewards.html" class="nav-item">
+                    <span class="nav-icon">🏆</span> Каталог подарков
+                </a>
+                <div class="nav-section-title">Пользователи</div>
+                <a href="/admin/users.html" class="nav-item">
+                    <span class="nav-icon">👥</span> Пользователи
+                </a>
+                <div class="nav-section-title">Аналитика</div>
+                <a href="/admin/reports.html" class="nav-item">
+                    <span class="nav-icon">📈</span> Отчеты
+                </a>
+                <a href="/admin/settings.html" class="nav-item">
+                    <span class="nav-icon">⚙️</span> Настройки
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item" id="logout-btn">
+                    <span class="nav-icon">🚪</span> Выйти
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="menu-toggle" id="menu-toggle">☰</button>
+                    <div>
+                        <div class="page-title">Склад аккаунтов</div>
+                        <div class="page-subtitle">Добавление учетных записей подписок и управление запасами</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content">
+                <!-- Stock Summary Grouped -->
+                <h4 style="margin-top: 0; margin-bottom: 12px; color: var(--text-secondary);">🔑 Сводка доступного запаса</h4>
+                <div class="stock-grid" id="stock-summary-container">
+                    <div class="loading-container"><div class="spinner"></div></div>
+                </div>
+
+                <div class="grid-3" style="grid-template-columns: 320px 1fr                    <!-- Add Stock Panel -->
+                    <div class="card">
+                        <div class="card-header" style="border-bottom:none; padding-bottom: 0;">
+                            <h3 class="card-title">📦 Добавить на склад</h3>
+                        </div>
+                        <div style="padding: 24px; padding-top:12px;">
+                            <div class="form-tabs">
+                                <button type="button" class="form-tab active" id="tab-single" onclick="switchAddTab('single')">Один аккаунт</button>
+                                <button type="button" class="form-tab" id="tab-bulk" onclick="switchAddTab('bulk')">Импорт списком</button>
+                            </div>
+ 
+                            <div class="form-group">
+                                <label class="form-label" for="add-plan-id">Целевой тариф</label>
+                                <select class="form-input" id="add-plan-id" required>
+                                    <option value="">Выберите тариф...</option>
+                                </select>
+                            </div>
+ 
+                            <!-- Single Add Form -->
+                            <form id="single-account-form">
+                                <div class="form-group">
+                                    <label class="form-label" for="acc-login">Логин / Email / Имя пользователя</label>
+                                    <input type="text" class="form-input" id="acc-login" placeholder="Например: user@gmail.com" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="acc-pass">Пароль</label>
+                                    <input type="text" class="form-input" id="acc-pass" placeholder="Например: secret123" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="acc-notes">Заметки (Опционально)</label>
+                                    <input type="text" class="form-input" id="acc-notes" placeholder="Например: Профиль 3 пин: 5678">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Добавить аккаунт</button>
+                            </form>
+ 
+                            <!-- Bulk Add Form -->
+                            <form id="bulk-account-form" style="display:none;">
+                                <div class="form-group">
+                                    <label class="form-label" for="bulk-data">Данные учетных записей</label>
+                                    <textarea class="form-input" id="bulk-data" rows="8" placeholder="Формат: один аккаунт на строку&#10;логин,пароль&#10;логин,пароль,заметки&#10;Или массив JSON" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Импортировать аккаунты</button>
+                            </form>
+                        </div>
+                    </div>     </div>
+                    </div>
+
+                    <!-- Inventory Table -->
+                    <div class="card">
+                        <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                <h3 class="card-title">📋 Список аккаунтов</h3>
+                                <div class="card-subtitle">Просмотр и редактирование текущего инвентаря</div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <select class="form-input" id="filter-plan-id" style="width: auto; height: 36px; padding: 4px 12px;">
+                                    <option value="">Все тарифы</option>
+                                </select>
+                                <select class="form-input" id="filter-status" style="width: auto; height: 36px; padding: 4px 12px;">
+                                    <option value="">Все статусы</option>
+                                    <option value="available">Доступен</option>
+                                    <option value="reserved">Зарезервирован</option>
+                                    <option value="sold">Продан</option>
+                                    <option value="disabled">Отключен</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="table-container" style="border:none;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Логин</th>
+                                        <th>Пароль</th>
+                                        <th>Платформа / Тариф</th>
+                                        <th>Статус</th>
+                                        <th>Заметки</th>
+                                        <th>Добавлен в</th>
+                                        <th class="text-right">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-table-body">
+                                    <tr><td colspan="7" class="text-center text-muted" style="padding: 40px;">Загрузка аккаунтов...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <div id="pagination-container" class="pagination"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Account Modal -->
+    <div class="modal" id="edit-account-modal">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 class="modal-title">Редактировать реквизиты аккаунта</h3>
+                <button class="modal-close" onclick="closeModal('edit-account-modal')">×</button>
+            </div>
+            <form id="edit-account-form">
+                <input type="hidden" id="edit-acc-id">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label" for="edit-acc-login">Логин / Email</label>
+                        <input type="text" class="form-input" id="edit-acc-login" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-acc-pass">Пароль</label>
+                        <input type="text" class="form-input" id="edit-acc-pass" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-acc-status">Статус</label>
+                        <select class="form-input" id="edit-acc-status">
+                            <option value="available">Доступен</option>
+                            <option value="reserved">Зарезервирован</option>
+                            <option value="sold">Продан</option>
+                            <option value="disabled">Отключен</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-acc-notes">Заметки</label>
+                        <input type="text" class="form-input" id="edit-acc-notes">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('edit-account-modal')">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/accounts.js"></script>
+    <script>
+        if (requireAuth()) {
+            initSidebar();
+            initLogout();
+            initAccounts();
+        }
+    </script>
+</body>
+</html>

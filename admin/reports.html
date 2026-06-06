@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отчеты и Аналитика — SubHub.store Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .report-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 500px) {
+            .report-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            margin-top: 16px;
+        }
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">🏪</div>
+                <div>
+                    <div class="brand-text">SubHub.store</div>
+                    <div class="brand-sub">Панель управления</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Главная</div>
+                <a href="/admin/dashboard.html" class="nav-item">
+                    <span class="nav-icon">📊</span> Панель состояния
+                </a>
+                <a href="/admin/orders.html" class="nav-item">
+                    <span class="nav-icon">📋</span> Заказы
+                    <span class="nav-badge" id="nav-pending-badge" style="display:none;">0</span>
+                </a>
+                <a href="/admin/redemptions.html" class="nav-item">
+                    <span class="nav-icon">🎁</span> Заявки на подарки
+                    <span class="nav-badge" id="nav-redemptions-badge" style="display:none;">0</span>
+                </a>
+                <a href="/admin/wallet_topups.html" class="nav-item">
+                    <span class="nav-icon">💳</span> Пополнения кошелька
+                    <span class="nav-badge" id="nav-topups-badge" style="display:none;">0</span>
+                </a>
+                <div class="nav-section-title">Каталог</div>
+                <a href="/admin/platforms.html" class="nav-item">
+                    <span class="nav-icon">🎮</span> Платформы и Тарифы
+                </a>
+                <a href="/admin/accounts.html" class="nav-item">
+                    <span class="nav-icon">🔑</span> Аккаунты
+                </a>
+                <a href="/admin/rewards.html" class="nav-item">
+                    <span class="nav-icon">🏆</span> Каталог подарков
+                </a>
+                <div class="nav-section-title">Пользователи</div>
+                <a href="/admin/users.html" class="nav-item">
+                    <span class="nav-icon">👥</span> Пользователи
+                </a>
+                <div class="nav-section-title">Аналитика</div>
+                <a href="/admin/reports.html" class="nav-item active">
+                    <span class="nav-icon">📈</span> Отчеты
+                </a>
+                <a href="/admin/settings.html" class="nav-item">
+                    <span class="nav-icon">⚙️</span> Настройки
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item" id="logout-btn">
+                    <span class="nav-icon">🚪</span> Выйти
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="menu-toggle" id="menu-toggle">☰</button>
+                    <div>
+                        <div class="page-title">Отчеты и Аналитика</div>
+                        <div class="page-subtitle">Отслеживание выручки с продаж, роста пользователей и статистики платежей</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content">
+                <!-- Date Filter Card -->
+                <div class="card mb-24">
+                    <form id="report-filter-form" style="display: flex; gap: 16px; align-items: flex-end; padding: 20px; flex-wrap: wrap;">
+                        <div class="form-group" style="margin-bottom: 0; min-width: 180px;">
+                            <label class="form-label" for="report-start-date">Начальная дата</label>
+                            <input type="date" class="form-input" id="report-start-date">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0; min-width: 180px;">
+                            <label class="form-label" for="report-end-date">Конечная дата</label>
+                            <input type="date" class="form-input" id="report-end-date">
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="height: 38px;">Сформировать отчет</button>
+                    </form>
+                </div>
+
+                <!-- KPI stats -->
+                <div class="kpi-grid mb-24">
+                    <div class="kpi-card">
+                        <div class="kpi-icon green">💰</div>
+                        <div class="kpi-value" id="rep-revenue">—</div>
+                        <div class="kpi-label">Выручка с продаж</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon purple">📦</div>
+                        <div class="kpi-value" id="rep-orders">—</div>
+                        <div class="kpi-label">Доставленные заказы</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon cyan">📊</div>
+                        <div class="kpi-value" id="rep-aov">—</div>
+                        <div class="kpi-label">Средний чек</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon red">🎁</div>
+                        <div class="kpi-value" id="rep-ref-cost">—</div>
+                        <div class="kpi-label">Расходы на рефералов</div>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="report-grid">
+                    <!-- Chart 1: Revenue Trend -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">📈 Тренд выручки</h3>
+                            <div class="card-subtitle">Ежедневная выручка с выполненных заказов</div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-revenue"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Platform Distribution -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">🎮 Продажи по платформам</h3>
+                            <div class="card-subtitle">Выручка по каждой платформе</div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="chart-platforms"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="report-grid">
+                    <!-- Chart 3: Payment Breakdown -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">💳 Способы оплаты</h3>
+                            <div class="card-subtitle">Распределение выполненных заказов по типу оплаты</div>
+                        </div>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="chart-payments"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Leaderboard -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">🏆 Топ приглашающих (Рефералы)</h3>
+                            <div class="card-subtitle">Пользователи, пригласившие наибольшее число активных покупателей</div>
+                        </div>
+                        <div class="leaderboard-list" id="leaderboard-container">
+                            <div class="loading-container"><div class="spinner"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ChartJS library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/reports.js"></script>
+    <script>
+        if (requireAuth()) {
+            initSidebar();
+            initLogout();
+            initReports();
+        }
+    </script>
+</body>
+</html>

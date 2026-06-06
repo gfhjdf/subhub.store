@@ -1,0 +1,36 @@
+# Python caching
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Databases
+data/*.db
+*.db
+*.sqlite
+
+# Uploads
+uploads/
+uploads/screenshots/
+
+# Environment configurations containing secrets
+.env
+
+# Local scratch files and temporary test scripts
+scratch/
+testing_emoji.py
+
+# IDE settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

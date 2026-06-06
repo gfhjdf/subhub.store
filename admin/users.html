@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пользователи и Рефералы — SubHub.store Admin</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+        .page-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+        .page-tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 600;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .page-tab-btn:hover {
+            color: var(--text-primary);
+            background: var(--surface-hover);
+        }
+        .page-tab-btn.active {
+            color: var(--accent-cyan);
+            background: var(--surface-active);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.1);
+        }
+        .modal-tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+        .modal-tab {
+            padding: 8px 12px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+        }
+        .modal-tab.active {
+            color: var(--accent-purple-light);
+            border-bottom-color: var(--accent-purple-light);
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon">🏪</div>
+                <div>
+                    <div class="brand-text">SubHub.store</div>
+                    <div class="brand-sub">Панель управления</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Главная</div>
+                <a href="/admin/dashboard.html" class="nav-item">
+                    <span class="nav-icon">📊</span> Панель состояния
+                </a>
+                <a href="/admin/orders.html" class="nav-item">
+                    <span class="nav-icon">📋</span> Заказы
+                    <span class="nav-badge" id="nav-pending-badge" style="display:none;">0</span>
+                </a>
+                <a href="/admin/redemptions.html" class="nav-item">
+                    <span class="nav-icon">🎁</span> Заявки на подарки
+                    <span class="nav-badge" id="nav-redemptions-badge" style="display:none;">0</span>
+                </a>
+                <a href="/admin/wallet_topups.html" class="nav-item">
+                    <span class="nav-icon">💳</span> Пополнения кошелька
+                    <span class="nav-badge" id="nav-topups-badge" style="display:none;">0</span>
+                </a>
+                <div class="nav-section-title">Каталог</div>
+                <a href="/admin/platforms.html" class="nav-item">
+                    <span class="nav-icon">🎮</span> Платформы и Тарифы
+                </a>
+                <a href="/admin/accounts.html" class="nav-item">
+                    <span class="nav-icon">🔑</span> Аккаунты
+                </a>
+                <a href="/admin/rewards.html" class="nav-item">
+                    <span class="nav-icon">🏆</span> Каталог подарков
+                </a>
+                <div class="nav-section-title">Пользователи</div>
+                <a href="/admin/users.html" class="nav-item active">
+                    <span class="nav-icon">👥</span> Пользователи
+                </a>
+                <div class="nav-section-title">Аналитика</div>
+                <a href="/admin/reports.html" class="nav-item">
+                    <span class="nav-icon">📈</span> Отчеты
+                </a>
+                <a href="/admin/settings.html" class="nav-item">
+                    <span class="nav-icon">⚙️</span> Настройки
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" class="nav-item" id="logout-btn">
+                    <span class="nav-icon">🚪</span> Выйти
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="top-bar-left">
+                    <button class="menu-toggle" id="menu-toggle">☰</button>
+                    <div>
+                        <div class="page-title">Пользователи и Рефералы</div>
+                        <div class="page-subtitle">Просмотр базы пользователей, реферальных выплат и предупреждений безопасности</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content">
+                <!-- Page sub tabs -->
+                <div class="page-tabs">
+                    <button class="page-tab-btn active" id="tab-btn-users" onclick="switchPageTab('users')">👥 Список пользователей</button>
+                    <button class="page-tab-btn" id="tab-btn-referrals" onclick="switchPageTab('referrals')">🎁 История рефералов</button>
+                    <button class="page-tab-btn" id="tab-btn-alerts" onclick="switchPageTab('alerts')">🚨 Предупреждения безопасности</button>
+                </div>
+
+                <!-- Users Section -->
+                <div id="section-users">
+                    <div class="card mb-24">
+                        <div style="padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                            <div class="form-group" style="margin-bottom: 0; max-width: 400px; flex: 1;">
+                                <input type="text" class="form-input" id="search-users" placeholder="🔍 Поиск по Username, ID или имени в Telegram...">
+                            </div>
+                            <button class="btn btn-outline" onclick="loadUsers(0)">Поиск</button>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="table-container" style="border:none;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Telegram ID</th>
+                                        <th>Пользователь</th>
+                                        <th>Язык</th>
+                                        <th>Баланс</th>
+                                        <th>Баллы</th>
+                                        <th>Реф. код</th>
+                                        <th>Дата регистрации</th>
+                                        <th class="text-right">Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body">
+                                    <tr><td colspan="8" class="text-center text-muted" style="padding: 40px;">Загрузка пользователей...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <div id="users-pagination-container" class="pagination"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Referrals Section -->
+                <div id="section-referrals" style="display:none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Реферальные связи</h3>
+                            <div class="card-subtitle">Каждое успешное приглашение в системе</div>
+                        </div>
+                        <div class="table-container" style="border:none;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Кто пригласил</th>
+                                        <th>ID пригласившего</th>
+                                        <th>Приглашенный</th>
+                                        <th>ID приглашенного</th>
+                                        <th>Сумма вознаграждения</th>
+                                        <th>Статус</th>
+                                        <th>Дата привязки</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="referrals-table-body">
+                                    <tr><td colspan="7" class="text-center text-muted" style="padding: 40px;">Загрузка рефералов...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="card-footer">
+                            <div id="referrals-pagination-container" class="pagination"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Alerts Section -->
+                <div id="section-alerts" style="display:none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Предупреждения безопасности</h3>
+                            <div class="card-subtitle">Подозрительные действия, указывающие на накрутку или спам</div>
+                        </div>
+                        <div class="table-container" style="border:none;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Пользователь</th>
+                                        <th>Telegram ID</th>
+                                        <th>Тип предупреждения</th>
+                                        <th>Описание</th>
+                                        <th>Статус</th>
+                                        <th>Время срабатывания</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alerts-table-body">
+                                    <tr><td colspan="6" class="text-center text-muted" style="padding: 40px;">Загрузка предупреждений...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- User Detail Modal -->
+    <div class="modal" id="user-detail-modal">
+        <div class="modal-dialog" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title" id="user-modal-title">Профиль пользователя</h3>
+                <button class="modal-close" onclick="closeModal('user-detail-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <!-- Inner Tabs -->
+                <div class="modal-tabs">
+                    <button type="button" class="modal-tab active" id="m-tab-info" onclick="switchModalTab('info')">Информация</button>
+                    <button type="button" class="modal-tab" id="m-tab-orders" onclick="switchModalTab('orders')">Заказы (<span id="m-orders-count">0</span>)</button>
+                    <button type="button" class="modal-tab" id="m-tab-txs" onclick="switchModalTab('txs')">История баланса</button>
+                    <button type="button" class="modal-tab" id="m-tab-points" onclick="switchModalTab('points')">История баллов</button>
+                    <button type="button" class="modal-tab" id="m-tab-refs" onclick="switchModalTab('refs')">Приглашенные</button>
+                </div>
+
+                <!-- Info Tab Content -->
+                <div id="m-content-info">
+                    <div class="grid-2" id="user-info-detail">
+                        <!-- Filled in JS -->
+                    </div>
+                </div>
+
+                <!-- Orders Tab Content -->
+                <div id="m-content-orders" style="display:none;">
+                    <div class="table-container" style="border: none;">
+                        <table style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>ID заказа</th>
+                                    <th>Платформа/Тариф</th>
+                                    <th>Цена</th>
+                                    <th>Статус</th>
+                                    <th>Дата</th>
+                                </tr>
+                            </thead>
+                            <tbody id="m-orders-tbody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Transactions Tab Content -->
+                <div id="m-content-txs" style="display:none;">
+                    <div class="table-container" style="border: none;">
+                        <table style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>Тип транзакции</th>
+                                    <th>Сумма</th>
+                                    <th>Комментарий</th>
+                                    <th>Дата</th>
+                                </tr>
+                            </thead>
+                            <tbody id="m-txs-tbody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Points Tab Content -->
+                <div id="m-content-points" style="display:none;">
+                    <div class="table-container" style="border: none;">
+                        <table style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>Тип транзакции</th>
+                                    <th>Баллы</th>
+                                    <th>Описание</th>
+                                    <th>Дата</th>
+                                </tr>
+                            </thead>
+                            <tbody id="m-points-tbody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Referrals Tab Content -->
+                <div id="m-content-refs" style="display:none;">
+                    <div style="padding: 12px; background: rgba(255,255,255,0.02); border-radius: 6px; margin-bottom: 12px;">
+                        <div><strong>Реферальная ссылка:</strong> <code id="m-ref-link" style="word-break: break-all;"></code></div>
+                        <div style="margin-top: 8px;">
+                            <span>Всего приглашено: <strong id="m-ref-count">0</strong></span>
+                            <span style="margin-left: 20px;">Получено вознаграждений: <strong id="m-ref-earned" style="color:var(--success);">0 UZS</strong></span>
+                        </div>
+                    </div>
+                    <div class="table-container" style="border: none;">
+                        <table style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>Приглашенный пользователь</th>
+                                    <th>Telegram ID</th>
+                                    <th>Дата регистрации</th>
+                                </tr>
+                            </thead>
+                            <tbody id="m-refs-tbody">
+                                <!-- Dynamic -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('user-detail-modal')">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/users.js"></script>
+    <script>
+        if (requireAuth()) {
+            initSidebar();
+            initLogout();
+            initUsers();
+        }
+    </script>
+</body>
+</html>
